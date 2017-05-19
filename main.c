@@ -9,6 +9,61 @@
 #include "enc.h"
 #include <sys/time.h>
 
+void increment(unsigned char* X, int radix, int len) {
+	int i = len-1;
+	while (i >= 0) {
+		X[i]++;
+		if (X[i] == 10 + '0' && radix == 16) {
+			X[i] = 'a';
+			break;
+		} else if (X[i] == 'g' || X[i] == 10 + '0'
+			|| (X[i] == 2 + '0' && radix == 2)) {
+			X[i] = '0';
+		} else {
+			break;
+		}
+		i--;
+	}
+	//print_bytes(X, len);
+}
+
+void print_num(unsigned char* str, int len) {
+	int i;
+	for (i=0; i < len; i++) {
+		printf("%c", str[i]);
+	}
+	printf("\n");
+}
+
+void permutation_check(int radix, int len) {
+	unsigned char K[] = "1234567890123456";
+	unsigned char tweak[] = {1, 2, 3, 4, 5, 6, 7, 8};
+	unsigned char X[len];
+	memset(X, '0', len);
+	unsigned char Y[len];
+	unsigned char Yd[len];
+	int total = pow(radix, len)/1;
+	unsigned char ciphertexts[total];
+	memset(ciphertexts, 0, total);
+	int i;
+	for (i = 0; i < total; i++) {
+		memset(Y, 0, len);
+		printf("X: ");
+		print_num(X, len);
+		decrypt_FF3(K, X, radix, len, tweak, Y);
+		printf("Y: ");
+		print_num(Y, len);
+		int64_t num = str_to_64(Y, len, radix);
+		if (ciphertexts[num]) {
+			fprintf(stderr, "Oh no this isn't a permutation!!!!\n");
+			exit(0);
+		}
+		increment(X, radix, len);
+		ciphertexts[num] = 1;
+		printf("\n");
+	}
+	fprintf(stderr, "Wow, this is a permutation!!\n");
+}
 
 int main(int argc, const char * argv[]) {
 	/* Initialise the library */
@@ -16,35 +71,29 @@ int main(int argc, const char * argv[]) {
 	OpenSSL_add_all_algorithms();
 	OPENSSL_config(NULL);
 	
+//	void encrypt_FF3(unsigned char* K, unsigned char* X, int radix, int n, unsigned char* T, unsigned char *Y) 
+	
 	unsigned char K[] = "1234567890123456";
-	unsigned char X = 0x25;
+	unsigned char Yd[4];
 	unsigned char tweak[] = {1, 2, 3, 4, 5, 6, 7, 8};
-	p(X, "plaintext");
-	unsigned char Y = encrypt_FF3_8_bits(K, X, tweak);
-	p(Y, "ciphertext");
-	unsigned char Yd = decrypt_FF3_8_bits(K, Y, tweak);
-	p(Yd, "decrypted ciphertext");
+	unsigned char X[4];
+	unsigned char Y[4];
+
+// 	memcpy(X, "0003", 4);
+// 	print_bytes(X, 4, "plaintext");
+// 	encrypt_FF3(K, X, 10, 4, tweak, Y);
+// 	print_bytes(Y, 4, "ciphertext");
+// 	decrypt_FF3(K, Y, 10, 4, tweak, Yd);
+// 	print_bytes(Yd, 4, "decrypted ciphertext");
 	
-	int64_t q = 0x1LL << 27;
- 	int won = G_mr(q);
- 	fprintf(stderr, "win?: %d\n", won);
+	permutation_check(10, 2);
 	
-// 	int i;
-// 	for (i = 0; i < 100; i++) {
-// 		fprintf(stderr, "%d: ", i);
-// 		unsigned char new_ciphertext = encrypt_FF3_8_bits(K, X, tweak);
-// 		fprintf(stderr, "%02x\n", new_ciphertext);
-// 		if (new_ciphertext == ciphertexts[i]) {
-// 			fprintf(stderr, "OMG this isn't a permutation!!!!\n");
-// 			return 0;
-// 		}
-// 		ciphertexts[i] = new_ciphertext;
-// 		unsigned char tens = (i+1) / 10;
-// 		unsigned char ones = (i+1) % 10;
-// 		X = tens << 4;
-// 		X |= ones;
-// 	}
-// 	fprintf(stderr, "Wow, this is a permutation!!");
+//	int64_t q = 0x1LL << 27;
+// 	int won = G_mr(q);
+// 	fprintf(stderr, "win?: %d\n", won);
+	
+
+//  *****Timed testing******
 //	fprintf(stderr, "decrypted ciphertext: %02x\n", decrypt_FF3_8_bits(K, Y, tweak));
 //  	struct timeval t1, t2;
 //  	double elapsed_time;
