@@ -52,7 +52,9 @@ void permutation_check(int radix, int len) {
 		print_num(X, len, "X");
 		encrypt_FF3(K, X, radix, len, tweak, Y);
 		print_num(Y, len, "Y");
-		int64_t num = str_to_64(Y, len, radix);
+		unsigned char Yp[len];
+		str_to_bytes(Yp, Y, len);
+		uint64_t num = str_to_64(Yp, len, radix);
 		if (ciphertexts[num]) {
 			fprintf(stderr, "Oh no this isn't a permutation!!!!\n");
 			exit(0);
@@ -78,6 +80,7 @@ int main(int argc, const char * argv[]) {
 	unsigned char X[4];
 	unsigned char Y[4];
 
+
 // 	memcpy(X, "0003", 4);
 // 	print_bytes(X, 4, "plaintext");
 // 	encrypt_FF3(K, X, 10, 4, tweak, Y);
@@ -85,13 +88,9 @@ int main(int argc, const char * argv[]) {
 // 	decrypt_FF3(K, Y, 10, 4, tweak, Yd);
 // 	print_bytes(Yd, 4, "decrypted ciphertext");
 	
-//	permutation_check(10, 2);
+	permutation_check(16, 4);
 
-	unsigned char S[] = "1234567890123456";
-	print_bytes(S, 16, "S");
-	get_ymod(S, 16, 5, 10);
-
-
+	
 	
 //	int64_t q = 0x1LL << 27;
 // 	int won = G_mr(q);

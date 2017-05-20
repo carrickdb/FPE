@@ -223,13 +223,11 @@ void FF3firstversion() {
 
 void print_bytes(unsigned char *mem, int size, char* name) {
 	printf("%s: ", name);
-  int i;
-  for (i = 0; i < size; i++) {
-    printf("%02x", mem[i]);
-    if ((i%16==0) && i)
-      printf("\n");
-  }
-  printf("\n");
+  	int i;
+  	for (i = 0; i < size; i++) {
+	    printf("%02x ", mem[i]);
+  	}
+  	printf("\n");
 }
 
 void int_to_bytes(unsigned char* buf, int num, int len) {
@@ -249,7 +247,7 @@ void long_to_bytes(unsigned char* buf, long num, int len) {
 	}
 }
 
-void int64_to_bytes(unsigned char* buf, int64_t num, int len) {
+void int64_to_bytes(unsigned char* buf, uint64_t num, int len) {
 	memset(buf, 0, len);
 	int start = 0;
 	if (len > 8) {
@@ -320,12 +318,20 @@ void reverse_bytes(unsigned char* rev_bytestr, unsigned char* bytestr, int len) 
 	}
 }
 
-int64_t str_to_64(unsigned char* str, int len, int radix) {
-	// str already converted to raw numbers from character string
-	int64_t num = 0;
+uint64_t str_to_64(unsigned char* str, int len, int radix) {
+	// str assumed already converted to raw numbers from character string
+	uint64_t num = 0;
 	int i;
 	for (i=0; i<len; i++) {
-		num += str[i]*(pow(radix, len-i-1)/1);
+// 		printf("str: %d\n", str[i]);
+		double radix_pow = pow(radix, len-i-1);
+		int radix_p = (int)radix_pow/1;
+// 		printf("radix^pow: %f\n", radix_pow);
+// 		printf("radix^p: %d\n", radix_p);
+		int total = str[i]*radix_p;
+// 		printf("%d\n", total);
+		num += str[i]*radix_p;
+// 		printf("%lld\n", num);
 	}
 	return num;
 }
@@ -346,26 +352,25 @@ uint64_t get_ymod(unsigned char* buf, int buflen, int m, int radix) {
 	if (radix == 2 || radix == 16) {
 		int overflow = seglen % 8;
 		int full_bytes = seglen / 8;
-		print_bytes(buf+buflen-full_bytes-1, 1, "buf");
+		//print_bytes(buf+buflen-full_bytes-1, 1, "buf");
 		int mask = 0xFF;
 		mask >>= 8-overflow;
 		ymod = buf[buflen-full_bytes-1] & mask;
 		full_bytes--;
-		printf("%lld\n", ymod);
+		//printf("%lld\n", ymod);
 		while (full_bytes >= 0) {
 			ymod <<= 8;
-			printf("%lld\n", ymod);
+			//printf("%lld\n", ymod);
 			ymod |= buf[buflen-full_bytes-1];
-			printf("%lld\n", ymod);
+			//printf("%lld\n", ymod);
 			full_bytes--;
 		}
-		printf("y mod power of 2 or 16: %lld\n", ymod);
+		//printf("y mod power of 2 or 16: %lld\n", ymod);
 		return ymod;
 	}
 	// radix = 10
 	int curr = buflen-1;
 	ymod = buf[curr] % radix_m;
-	printf("ymod pre-loop: %lld\n", ymod);
 	int twos_mod = 1;
 	curr--;
 	while (curr >= 0) {
@@ -377,23 +382,15 @@ uint64_t get_ymod(unsigned char* buf, int buflen, int m, int radix) {
 		ymod = (ymod+bufmod) %radix_m;
 		curr--;
 	}
-	printf("y mod power of 10: %lld\n", ymod);
 	return ymod;
 }
 
-void int64_to_str(unsigned char* dest, int64_t num, int len, int radix) {
+void int64_to_str(unsigned char* dest, int len, uint64_t num, int radix) {
+	// Does not convert to ASCII.
 	memset(dest, 0, len);
 	int curr = len - 1;
 	while (curr >= 0) {
 		dest[curr] = num % radix;
-		if (dest[curr] < 10) {
-			dest[curr] += '0';
-		} else if (dest[curr] < 16) {
-			dest[curr] += 87;
-		} else {
-			fprintf(stderr, "Invalid radix.\n");
-			exit(0);
-		}
 		num /= radix;
 		curr--;
 	}
@@ -437,13 +434,14 @@ void encrypt_FF3(unsigned char* K, unsigned char* X, int radix, int n, unsigned 
 	B = malloc(v*sizeof(unsigned char));
 	str_to_bytes(A, X, u);
 	str_to_bytes(B, X+u, v);
+// 	print_bytes(A, u, "A");
+// 	print_bytes(B, v, "B");	
 	int half_t_len = FF3_T_LEN/2;
 	unsigned char T_L[half_t_len];
 	memcpy(T_L, T, half_t_len);
 	unsigned char T_R[half_t_len];
 	memcpy(T_R, T+half_t_len, half_t_len);
 	unsigned char W[half_t_len];
-	unsigned char* newA;
 	int m;
 	int i;
 	for (i = 0; i < 8; i++) {
@@ -464,7 +462,7 @@ void encrypt_FF3(unsigned char* K, unsigned char* X, int radix, int n, unsigned 
 		unsigned char revB[n-m];
 		reverse_bytes(revB, B, n-m);
 		unsigned char num_str[12];
-		int64_t revB64 = str_to_64(revB, n-m, radix);
+		uint64_t revB64 = str_to_64(revB, n-m, radix);
 		int64_to_bytes(num_str, revB64, 12); // int to bytestring
 		memcpy(P+4, num_str, 12);
 		unsigned char revP[16];
@@ -479,17 +477,18 @@ void encrypt_FF3(unsigned char* K, unsigned char* X, int radix, int n, unsigned 
  		}
  		unsigned char S[16];
  		reverse_bytes(S, revS, 16);
- 		int radix_m = pow(radix, m)/1;
+ 		int radix_m = (int)pow(radix, m)/1;
  		unsigned char revA[m];
  		reverse_bytes(revA, A, m);
- 		int64_t revA64 = str_to_64(revA, m, radix);
+ 		uint64_t revA64 = str_to_64(revA, m, radix);
  		// int64_t get_ymod(unsigned char* buf, int buflen, int m, int radix)
- 		int64_t ymod = get_ymod(S, 16, m, radix);
- 		int64_t revA_mod = revA64 % radix_m;
- 		int c = (ymod + revA_mod) % radix_m;  // change to int64?
+ 		uint64_t ymod = get_ymod(S, 16, m, radix);
+ 		uint64_t revA_mod = revA64 % radix_m;
+ 		int c = (ymod + revA_mod) % radix_m;
+ 		//printf("%d\n", c);
  		unsigned char revC[m];
 //  		printf("c: %d\n", c);
- 		int64_to_str(revC, c, m, radix); 
+ 		int64_to_str(revC, m, c, radix);
 //  		print_bytes(revC, m, "revC");
  		unsigned char C[m];
  		reverse_bytes(C, revC, m);
