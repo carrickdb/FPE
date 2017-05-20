@@ -20,6 +20,6 @@ void encrypt_FF3(unsigned char* K, unsigned char* X, int radix, int n, unsigned 
 void decrypt_FF3(unsigned char* K, unsigned char* X, int radix, int n, unsigned char* T, unsigned char *Y);
 int G_mr(int64_t q);
 void print_bytes(unsigned char *mem, int size, char* name);
-void str_to_bytes(unsigned char * buf, unsigned char* str, int len, int radix);
+void str_to_bytes(unsigned char * buf, unsigned char* str, int len);
 
 #endif

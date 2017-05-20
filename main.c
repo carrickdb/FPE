@@ -27,7 +27,8 @@ void increment(unsigned char* X, int radix, int len) {
 	//print_bytes(X, len);
 }
 
-void print_num(unsigned char* str, int len) {
+void print_num(unsigned char* str, int len, char* name) {
+	printf("%s: ", name);
 	int i;
 	for (i=0; i < len; i++) {
 		printf("%c", str[i]);
@@ -48,11 +49,9 @@ void permutation_check(int radix, int len) {
 	int i;
 	for (i = 0; i < total; i++) {
 		memset(Y, 0, len);
-		printf("X: ");
-		print_num(X, len);
-		decrypt_FF3(K, X, radix, len, tweak, Y);
-		printf("Y: ");
-		print_num(Y, len);
+		print_num(X, len, "X");
+		encrypt_FF3(K, X, radix, len, tweak, Y);
+		print_num(Y, len, "Y");
 		int64_t num = str_to_64(Y, len, radix);
 		if (ciphertexts[num]) {
 			fprintf(stderr, "Oh no this isn't a permutation!!!!\n");
@@ -86,7 +85,13 @@ int main(int argc, const char * argv[]) {
 // 	decrypt_FF3(K, Y, 10, 4, tweak, Yd);
 // 	print_bytes(Yd, 4, "decrypted ciphertext");
 	
-	permutation_check(10, 2);
+//	permutation_check(10, 2);
+
+	unsigned char S[] = "1234567890123456";
+	print_bytes(S, 16, "S");
+	get_ymod(S, 16, 5, 10);
+
+
 	
 //	int64_t q = 0x1LL << 27;
 // 	int won = G_mr(q);
