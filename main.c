@@ -97,28 +97,14 @@ int main(int argc, const char * argv[]) {
 	ERR_load_crypto_strings();
 	OpenSSL_add_all_algorithms();
 	OPENSSL_config(NULL);
-	
-//	void encrypt_FF3(unsigned char* K, unsigned char* X, int radix, int n, unsigned char* T, unsigned char *Y) 
-	
-	unsigned char K[] = "1234567890123456";
-	unsigned char Yd[4];
-	unsigned char tweak[] = {1, 2, 3, 4, 5, 6, 7, 8};
-	unsigned char X[4];
-	unsigned char Y[4];
 
-	int len = 5;
+	int len = 2;
 	int radix = 16;
-
-	decryption_check(radix, len);
-
-
-// 	permutation_check(radix, len);
-
 	
+	uint64_t q = 0x1LL << 18;
+	int won = G_mr(q, radix, len);
+	fprintf(stderr, "win?: %d\n", won);
 	
-//	int64_t q = 0x1LL << 27;
-// 	int won = G_mr(q);
-// 	fprintf(stderr, "win?: %d\n", won);
 	
 
 //  *****Timed testing******

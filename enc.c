@@ -412,7 +412,7 @@ void str_to_bytes(unsigned char* dest, unsigned char* src, int len) {
 	}
 }
 
-void bytes_to_str(unsigned char* dest, unsigned char* src, int len) {
+void bytes_to_ascii(unsigned char* dest, unsigned char* src, int len) {
 	int i;
 	for (i=0;i<len;i++) {
 		if (src[i] < 10 && src[i] >=0) {
@@ -484,15 +484,11 @@ void encrypt_FF3(unsigned char* K, unsigned char* X, int radix, int n, unsigned 
  		unsigned char revA[m];
  		reverse_bytes(revA, A, m);
  		uint64_t revA64 = str_to_64(revA, m, radix);
- 		// int64_t get_ymod(unsigned char* buf, int buflen, int m, int radix)
  		uint64_t ymod = get_ymod(S, 16, m, radix);
  		uint64_t revA_mod = revA64 % radix_m;
  		int c = (ymod + revA_mod) % radix_m;
- 		//printf("%d\n", c);
  		unsigned char revC[m];
-//  		printf("c: %d\n", c);
  		int64_to_str(revC, m, c, radix);
-//  		print_bytes(revC, m, "revC");
  		unsigned char C[m];
  		reverse_bytes(C, revC, m);
  		free(A);
@@ -502,8 +498,8 @@ void encrypt_FF3(unsigned char* K, unsigned char* X, int radix, int n, unsigned 
  		B = malloc(m*sizeof(unsigned char));
  		memcpy(B, C, m);
 	}
-	bytes_to_str(Y, A, u);
-	bytes_to_str(Y+u, B, v);
+	bytes_to_ascii(Y, A, u);
+	bytes_to_ascii(Y+u, B, v);
 	free(A);
 	free(B);
 }
@@ -593,108 +589,144 @@ void decrypt_FF3(unsigned char* K, unsigned char* X, int radix, int n, unsigned 
 	}
 // 	print_bytes(A, m, "A");
 // 	print_bytes(B, n-m, "B");
-	bytes_to_str(Y, A, u);
-	bytes_to_str(Y+u, B, v);
+	bytes_to_ascii(Y, A, u);
+	bytes_to_ascii(Y+u, B, v);
 	free(A);
 	free(B);
 }
 
-/* 
-unsigned char Enc(unsigned char* T, int encrypt_X) {
-	unsigned char* curr_msg;
-	if (!encrypt_X) {
-		//printf("I am encrypting X'=");
-		curr_msg = Xp;
+void Enc(unsigned char* C, unsigned char* T, int encrypt_X, int radix, int len) {
+	K = malloc(16);
+	memcpy(K, "1234567890123456", 16); // TODO change to random?
+	unsigned char plaintext[len];
+	if (encrypt_X) {
+		memcpy(plaintext, X, len);
 	} else {
-		//printf("I am encrypting X=");
-		curr_msg = X;
+		memcpy(plaintext, Xp, len);
 	}
-	//printf("%02x with tweak ", curr_msg);
-	//print_bytes(T, 8);
-	return encrypt_FF3(K, curr_msg, T);
+	encrypt_FF3(K, plaintext, radix, len, T, C);
+	free(K);
 }
 
-
-unsigned char A_LHR(unsigned char* a, int64_t q) {
-	// Change start of tweaks? 
-	//p(a, "a");
-	unsigned char Lp = a >> 4;
-	unsigned char R = a & 0x0F;
-	//p(Lp, "Lp");
-	//p(R, "R");
-	unsigned long V[10];
-	memset(V, 0x0L, 10*sizeof(long));
-// 	fprintf(stderr, "V: ");
-// 	int k;
-// 	for (k=0; k<10; k++) {
-// 		fprintf(stderr, "%li", V[k]);
+unsigned char A_LHR_first_draft(unsigned char* a, uint64_t q) {
+// 	unsigned char Lp = a >> 4;
+// 	unsigned char R = a & 0x0F;
+// 	unsigned long V[10];
+// 	memset(V, 0x0L, 10*sizeof(long));
+// 	unsigned char T[8];
+// 	memset(T, 0, 8);
+// 	int64_t i;
+// 	for (i=0x0LL; i<q; i++) {
+// 		unsigned char C = Enc(T, 1);  // Encrypt X
+// 		unsigned char Cp = Enc(T, 0); // Encrypt X'
+// 		unsigned char A = C >> 4;
+// 		unsigned char Ap = Cp >> 4;
+// 		unsigned char s = (A - Ap) % 10;
+// 		if (s >=10) {
+// 			s += 10;
+// 		}
+// 		s = (s+Lp) % 10;
+// 		V[s] += 1;
+// 		T[0]++;
+// 		int j = 0;
+// 		while (T[j] == 0 && j < 7) {
+// 			j++;
+// 			T[j]++;
+// 		}
 // 	}
-// 	fprintf(stderr, "\n");
+// 	unsigned char L = 0;
+// 	int j;
+// 	for (j=1; j < 10; j++) {
+// 		if (V[j] > V[L]) {
+// 			L = j;
+// 		}
+// 	}
+// 	unsigned char guess = R;
+// 	L = L << 4;
+// 	guess = guess | L;
+	return 1; 
+}
+
+void A_LHR(unsigned char* a, uint64_t q, int radix, int len, unsigned char* guess) {
+	Xp = malloc(len);
+	memcpy(Xp, a, len);
+	int left_len = ceil(len/2)/1;
+	unsigned char Lp[left_len];
+	memcpy(Lp, Xp, left_len);
+	int M = (int)pow(radix, left_len);
+	uint64_t V[M];
+	memset(V, 0, M*sizeof(uint64_t));
 	unsigned char T[8];
 	memset(T, 0, 8);
-	//print_bytes(T, 8);
-	int64_t i;
+	uint64_t i;
 	for (i=0x0LL; i<q; i++) {
-		unsigned char C = Enc(T, 1);  // Encrypt X
-		unsigned char Cp = Enc(T, 0); // Encrypt X'
-		unsigned char A = C >> 4;
-		unsigned char Ap = Cp >> 4;
-		
-		unsigned char s = (A - Ap) % 10;
-//		p(s, "s");
-		if (s >=10) {
-			s += 10;
-			//p(s, "new s");
+		unsigned char C[len];
+		Enc(C, T, 1, radix, len); // Encrypt X
+		unsigned char Cp[len];
+		Enc(Cp, T, 0, radix, len); // Encrypt X'
+		unsigned char A[left_len];
+		memcpy(A, C, left_len);
+		unsigned char Ap[left_len];
+		memcpy(Ap, Cp, left_len);
+		unsigned char A_nonascii[left_len];
+		str_to_bytes(A_nonascii, A, left_len);
+		uint64_t A_num = str_to_64(A_nonascii, left_len, radix);
+		unsigned char Ap_nonascii[left_len];
+		str_to_bytes(Ap_nonascii, Ap, left_len);
+		uint64_t Ap_num = str_to_64(Ap_nonascii, left_len, radix);
+		Ap_num %= M;
+		A_num %= M;
+		int64_t A_diff = A_num - Ap_num;
+		A_diff %= M;
+		if (A_diff < 0) {
+			A_diff += M;
 		}
-		s = (s+Lp) % 10;
-		V[s] += 1;
+		unsigned char Lp_nonascii[left_len];
+		str_to_bytes(Lp_nonascii, Lp, left_len); 
+		int64_t Lp_num = str_to_64(Lp_nonascii, left_len, radix);
+		int64_t s = A_diff + Lp_num;
+		s %= M;
+		V[s]++;
 		T[0]++;
 		int j = 0;
 		while (T[j] == 0 && j < 7) {
 			j++;
 			T[j]++;
 		}
-		//fprintf(stderr, "new tweak: ");
-		//print_hex_memory(T, 8);
 	}
-	unsigned char L = 0;
-	fprintf(stderr, "Final V: %li", V[0]);
-	int j;
-	for (j=1; j < 10; j++) {
-		fprintf(stderr, " %li", V[j]);
+	uint64_t L = 0x0LL;
+	uint64_t j;
+	for (j=0x1LL; j < M; j++) {
 		if (V[j] > V[L]) {
 			L = j;
 		}
 	}
-	fprintf(stderr, "\n");
-	unsigned char guess = R;
-	L = L << 4;
-	guess = guess | L;
-	return guess; 
+	unsigned char L_str[left_len];
+	int64_to_str(L_str, left_len, L, radix);
+	unsigned char L_ascii[left_len];
+	bytes_to_ascii(L_ascii, L_str, left_len);
+	memcpy(guess, L_ascii, left_len);
+	memcpy(guess+left_len, Xp+left_len, len-left_len);
+	uint64_t k;
+	for (k=0x0LL; k<M; k++) {
+		printf("%llu: %llu\n", k, V[k]);
+	}
 }
 
-int cmp_bytes(unsigned char* guess, int len) {
-	
-	return 1;
+int G_mr(uint64_t q, int radix, int len) {
+	X = malloc(len);
+	memcpy(X, "91", len); // Target message X. Change to randomly generated?
+	unsigned char a[2];
+	memcpy(a, "41", 2);  // X' with same right half as X
+	unsigned char A_guess[len];
+	A_LHR(a, q, radix, len, A_guess); 
+	print_bytes(A_guess, len, "A's guess");
+	int wrong = memcmp(A_guess, X, len);
+	free(X);
+	return !wrong;
 }
 
 
-int G_mr(int64_t q) {
-	K = malloc(16);
-	memcpy(K, "1234567890123456", 16); // TODO change to random?
-	X = malloc(2);
-	memcpy(X, "84", 2); // Target message X --> change to randomly generated?
-	unsigned char a[] = "24";  // X' with equal right half
-	unsigned char* A_guess = A_LHR(a, q);
-	fprintf(stderr, "A_LHR's guess: %02x\n", A_guess);
-	free(K);
-	int correct = cmp_bytes(A_guess);
-	free(X)
-	return (1);
-}
-
-
- */
 
 
 
