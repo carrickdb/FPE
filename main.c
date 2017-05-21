@@ -42,16 +42,16 @@ void permutation_check(int radix, int len) {
 	unsigned char X[len];
 	memset(X, '0', len);
 	unsigned char Y[len];
-	unsigned char Yd[len];
 	int total = pow(radix, len)/1;
 	unsigned char ciphertexts[total];
 	memset(ciphertexts, 0, total);
 	int i;
 	for (i = 0; i < total; i++) {
 		memset(Y, 0, len);
-		print_num(X, len, "X");
+// 		print_bytes(X, len, "X");
 		encrypt_FF3(K, X, radix, len, tweak, Y);
-		print_num(Y, len, "Y");
+// 		print_bytes(Y, len, "Y");
+// 		printf("\n");
 		unsigned char Yp[len];
 		str_to_bytes(Yp, Y, len);
 		uint64_t num = str_to_64(Yp, len, radix);
@@ -61,9 +61,35 @@ void permutation_check(int radix, int len) {
 		}
 		increment(X, radix, len);
 		ciphertexts[num] = 1;
-		printf("\n");
 	}
 	fprintf(stderr, "Wow, this is a permutation!!\n");
+}
+
+void decryption_check(int radix, int len) {
+	unsigned char K[] = "1234567890123456";
+	unsigned char tweak[] = {1, 2, 3, 4, 5, 6, 7, 8};
+	unsigned char X[len];
+	memset(X, '0', len);
+	unsigned char Y[len];
+	unsigned char Yd[len];
+	uint64_t total = pow(radix, len)/1;
+	int i;
+	for (i = 0; i < total; i++) {
+		memset(Y, 0, len);
+		memset(Yd, 0, len);
+// 		print_bytes(X, len, "plaintext");
+		encrypt_FF3(K, X, radix, len, tweak, Y);
+// 		print_bytes(Y, len, "ciphertext");
+		decrypt_FF3(K, Y, radix, len, tweak, Yd);
+// 		print_bytes(Yd, len, "decrypted ciphertext");
+		if (memcmp(X, Yd, len)) {
+			printf("UGHGHGH the decryption doesn't match the plaintext.\n");
+			exit(0);
+		}
+		increment(X, radix, len);
+// 		printf("\n");
+	}
+	printf("Wow, all the decryptions match their plaintexts!\n");
 }
 
 int main(int argc, const char * argv[]) {
@@ -80,15 +106,13 @@ int main(int argc, const char * argv[]) {
 	unsigned char X[4];
 	unsigned char Y[4];
 
+	int len = 5;
+	int radix = 16;
 
-// 	memcpy(X, "0003", 4);
-// 	print_bytes(X, 4, "plaintext");
-// 	encrypt_FF3(K, X, 10, 4, tweak, Y);
-// 	print_bytes(Y, 4, "ciphertext");
-// 	decrypt_FF3(K, Y, 10, 4, tweak, Yd);
-// 	print_bytes(Yd, 4, "decrypted ciphertext");
-	
-	permutation_check(16, 4);
+	decryption_check(radix, len);
+
+
+// 	permutation_check(radix, len);
 
 	
 	
