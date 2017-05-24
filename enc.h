@@ -21,5 +21,6 @@ void decrypt_FF3(unsigned char* K, unsigned char* X, int radix, int n, unsigned 
 int G_mr(uint64_t q, int radix, int len);
 void print_bytes(unsigned char *mem, int size, char* name);
 void str_to_bytes(unsigned char * buf, unsigned char* str, int len);
+uint64_t str_to_64(unsigned char* str, int len, int radix);
 
 #endif

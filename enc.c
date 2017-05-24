@@ -263,6 +263,10 @@ void p(unsigned char num, char* name) {
 	fprintf(stderr, "%s: %02x\n", name, num);
 }
 
+void p64(uint64_t num, char* name) {
+	fprintf(stderr, "%s: %llu\n", name, num);
+}
+
 /* An implementation of NIST FPE standard FF1. */
 void encrypt_FF1(char* m, int radix, int m_len, unsigned char* tweak, int tweak_len) {
 	char c[m_len];
@@ -407,7 +411,7 @@ void str_to_bytes(unsigned char* dest, unsigned char* src, int len) {
 		} else if (src[i] > 96 && src[i] < 103) {
 			dest[i] = src[i] - 87;
 		} else {
-			printf("Invalid character.\n");
+			printf("Invalid character: %02x\n", src[i]);
 		}	
 	}
 }
@@ -431,7 +435,7 @@ void encrypt_FF3(unsigned char* K, unsigned char* X, int radix, int n, unsigned 
 	// The integers that each half of X represents are assumed to be expressible in 64 bits or fewer.
 	unsigned char* A;
 	unsigned char* B;
-	int u = ceil(n/2)/1;
+	int u = ceil((double)n/2.0)/1;
 	int v = n - u;
 	A = malloc(u*sizeof(unsigned char));
 	B = malloc(v*sizeof(unsigned char));
@@ -507,7 +511,8 @@ void encrypt_FF3(unsigned char* K, unsigned char* X, int radix, int n, unsigned 
 void decrypt_FF3(unsigned char* K, unsigned char* X, int radix, int n, unsigned char* T, unsigned char *Y) {
 	unsigned char* A;
 	unsigned char* B;
-	int u = ceil(n/2)/1;
+	int u = ceil((double)n/2.0)/1;
+// 	printf("%d\n", u);
 	int v = n - u;
 	A = malloc(u*sizeof(unsigned char));
 	B = malloc(v*sizeof(unsigned char));
@@ -650,7 +655,7 @@ unsigned char A_LHR_first_draft(unsigned char* a, uint64_t q) {
 void A_LHR(unsigned char* a, uint64_t q, int radix, int len, unsigned char* guess) {
 	Xp = malloc(len);
 	memcpy(Xp, a, len);
-	int left_len = ceil(len/2)/1;
+	int left_len = (int)ceil((double)len/2.0);
 	unsigned char Lp[left_len];
 	memcpy(Lp, Xp, left_len);
 	int M = (int)pow(radix, left_len);
@@ -684,12 +689,13 @@ void A_LHR(unsigned char* a, uint64_t q, int radix, int len, unsigned char* gues
 		unsigned char Lp_nonascii[left_len];
 		str_to_bytes(Lp_nonascii, Lp, left_len); 
 		int64_t Lp_num = str_to_64(Lp_nonascii, left_len, radix);
+		Lp_num %= M;
 		int64_t s = A_diff + Lp_num;
 		s %= M;
 		V[s]++;
 		T[0]++;
 		int j = 0;
-		while (T[j] == 0 && j < 7) {
+		while (T[j] == 0 && j < 8) {
 			j++;
 			T[j]++;
 		}
@@ -713,19 +719,38 @@ void A_LHR(unsigned char* a, uint64_t q, int radix, int len, unsigned char* gues
 	}
 }
 
+void A_RHR(unsigned char* a, uint64_t q, int radix, int len, unsigned char* guess) {
+	
+
+
+
+}
+
 int G_mr(uint64_t q, int radix, int len) {
 	X = malloc(len);
-	memcpy(X, "91", len); // Target message X. Change to randomly generated?
-	unsigned char a[2];
-	memcpy(a, "41", 2);  // X' with same right half as X
+	memcpy(X, "53", len); 
+	unsigned char a[len];
+	memcpy(a, "93", len);  // X' with same right half as X
 	unsigned char A_guess[len];
 	A_LHR(a, q, radix, len, A_guess); 
 	print_bytes(A_guess, len, "A's guess");
+	printf("\n");
 	int wrong = memcmp(A_guess, X, len);
 	free(X);
 	return !wrong;
 }
 
+int check_G_mr(uint64_t q, int radix, int len, unsigned char* M, unsigned char* a) {
+	X = malloc(len);
+	memcpy(X, M, len); 
+	unsigned char A_guess[len];
+	A_LHR(a, q, radix, len, A_guess); 
+	print_bytes(A_guess, len, "A's guess");
+	printf("\n");
+	int wrong = memcmp(A_guess, X, len);
+	free(X);
+	return !wrong;
+}
 
 
 

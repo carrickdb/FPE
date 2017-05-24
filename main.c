@@ -92,6 +92,25 @@ void decryption_check(int radix, int len) {
 	printf("Wow, all the decryptions match their plaintexts!\n");
 }
 
+void attack_check(int radix, int len, unsigned char* a) {
+	unsigned char X[len];
+	int m = (int)ceil((double)len/2.0);
+	memset(X, '0', m);
+	memcpy(X+m, a+m, len - m);
+	int radix_m = (int)pow(radix, m);
+	int i;
+	for (i=0;i<radix_m;i++) {
+		if (memcmp(a, X, m)) {
+			print_num(X, len, "X");
+			uint64_t q = 0x1LL << 20;
+			int won = check_G_mr(q, radix, len, X, a);
+			fprintf(stderr, "win?: %d\n", won);
+			printf("\n");
+		}
+		increment(X, radix, m);
+	}
+}
+
 int main(int argc, const char * argv[]) {
 	/* Initialise the library */
 	ERR_load_crypto_strings();
@@ -99,11 +118,14 @@ int main(int argc, const char * argv[]) {
 	OPENSSL_config(NULL);
 
 	int len = 2;
-	int radix = 16;
+	int radix = 10;
+	unsigned char a[] = "92";
+	attack_check(radix, len, a);
+
 	
-	uint64_t q = 0x1LL << 18;
-	int won = G_mr(q, radix, len);
-	fprintf(stderr, "win?: %d\n", won);
+// 	uint64_t q = 0x1LL << 20;
+// 	int won = G_mr(q, radix, len);
+// 	fprintf(stderr, "win?: %d\n", won);
 	
 	
 

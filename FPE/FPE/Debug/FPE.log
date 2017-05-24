@@ -1,0 +1,54 @@
+﻿  main.c
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\enc.h(23): error C2146: syntax error: missing ')' before identifier 'q'
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\enc.h(23): error C2061: syntax error: identifier 'q'
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\enc.h(23): error C2059: syntax error: ';'
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\enc.h(23): error C2059: syntax error: ','
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\enc.h(23): error C2059: syntax error: ')'
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(44): error C2057: expected constant expression
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(44): error C2466: cannot allocate an array of constant size 0
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(44): error C2133: 'X': unknown size
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(46): error C2057: expected constant expression
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(46): error C2466: cannot allocate an array of constant size 0
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(46): error C2133: 'Y': unknown size
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(48): error C2057: expected constant expression
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(48): error C2466: cannot allocate an array of constant size 0
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(48): error C2133: 'ciphertexts': unknown size
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(57): error C2057: expected constant expression
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(57): error C2466: cannot allocate an array of constant size 0
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(57): error C2133: 'Yp': unknown size
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(59): error C2065: 'uint64_t': undeclared identifier
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(59): error C2146: syntax error: missing ';' before identifier 'num'
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(59): error C2065: 'num': undeclared identifier
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(59): warning C4013: 'str_to_64' undefined; assuming extern returning int
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(60): error C2065: 'num': undeclared identifier
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(65): error C2065: 'num': undeclared identifier
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(47): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(73): error C2057: expected constant expression
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(73): error C2466: cannot allocate an array of constant size 0
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(73): error C2133: 'X': unknown size
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(75): error C2057: expected constant expression
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(75): error C2466: cannot allocate an array of constant size 0
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(75): error C2133: 'Y': unknown size
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(76): error C2057: expected constant expression
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(76): error C2466: cannot allocate an array of constant size 0
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(76): error C2133: 'Yd': unknown size
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(77): error C2065: 'uint64_t': undeclared identifier
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(77): error C2146: syntax error: missing ';' before identifier 'total'
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(77): error C2065: 'total': undeclared identifier
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(77): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(79): error C2065: 'total': undeclared identifier
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(98): error C2057: expected constant expression
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(98): error C2466: cannot allocate an array of constant size 0
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(98): error C2133: 'X': unknown size
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(100): error C2057: expected constant expression
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(100): error C2466: cannot allocate an array of constant size 0
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(100): error C2133: 'a': unknown size
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(113): error C2065: 'uint64_t': undeclared identifier
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(113): error C2146: syntax error: missing ';' before identifier 'q'
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(113): error C2065: 'q': undeclared identifier
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(114): warning C4013: 'G_mr' undefined; assuming extern returning int
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\main.c(114): error C2065: 'q': undeclared identifier
+  enc.c
+c:\users\carrickdb\dropbox\fpe\code\fpe\fpe\enc.c : fatal error C1041: cannot open program database 'C:\Users\carrickdb\Dropbox\FPE\code\FPE\FPE\Debug\vc140.idb'; if multiple CL.EXE write to the same .PDB file, please use /FS
+  Generating Code...
+cl : Command line warning D9028: minimal rebuild failure, reverting to normal build
