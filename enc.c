@@ -412,6 +412,7 @@ void str_to_bytes(unsigned char* dest, unsigned char* src, int len) {
 			dest[i] = src[i] - 87;
 		} else {
 			printf("Invalid character: %02x\n", src[i]);
+			exit(0);
 		}	
 	}
 }
@@ -652,6 +653,25 @@ unsigned char A_LHR_first_draft(unsigned char* a, uint64_t q) {
 	return 1; 
 }
 
+
+int64_t subtract_str(unsigned char* str, unsigned char* strp, int radix, int len) {
+	unsigned char str_nonascii[len];
+	str_to_bytes(str_nonascii, str, len);
+	uint64_t str_num = str_to_64(str_nonascii, len, radix);
+	unsigned char strp_nonascii[len];
+	str_to_bytes(strp_nonascii, strp, len);
+	uint64_t strp_num = str_to_64(strp_nonascii, len, radix);
+	int radix_len = (int) pow(radix, len);
+	strp_num %= radix_len;
+	str_num %= radix_len;
+	int64_t diff = str_num - strp_num;
+	diff %= radix_len;
+	if (diff < 0) {
+		diff += radix_len;
+	}
+	return diff;
+}
+
 void A_LHR(unsigned char* a, uint64_t q, int radix, int len, unsigned char* guess) {
 	Xp = malloc(len);
 	memcpy(Xp, a, len);
@@ -669,28 +689,12 @@ void A_LHR(unsigned char* a, uint64_t q, int radix, int len, unsigned char* gues
 		Enc(C, T, 1, radix, len); // Encrypt X
 		unsigned char Cp[len];
 		Enc(Cp, T, 0, radix, len); // Encrypt X'
-		unsigned char A[left_len];
-		memcpy(A, C, left_len);
-		unsigned char Ap[left_len];
-		memcpy(Ap, Cp, left_len);
-		unsigned char A_nonascii[left_len];
-		str_to_bytes(A_nonascii, A, left_len);
-		uint64_t A_num = str_to_64(A_nonascii, left_len, radix);
-		unsigned char Ap_nonascii[left_len];
-		str_to_bytes(Ap_nonascii, Ap, left_len);
-		uint64_t Ap_num = str_to_64(Ap_nonascii, left_len, radix);
-		Ap_num %= M;
-		A_num %= M;
-		int64_t A_diff = A_num - Ap_num;
-		A_diff %= M;
-		if (A_diff < 0) {
-			A_diff += M;
-		}
+		int64_t diff = subtract_str(C, Cp, radix, left_len);
 		unsigned char Lp_nonascii[left_len];
 		str_to_bytes(Lp_nonascii, Lp, left_len); 
 		int64_t Lp_num = str_to_64(Lp_nonascii, left_len, radix);
 		Lp_num %= M;
-		int64_t s = A_diff + Lp_num;
+		int64_t s = diff + Lp_num;
 		s %= M;
 		V[s]++;
 		T[0]++;
@@ -720,31 +724,55 @@ void A_LHR(unsigned char* a, uint64_t q, int radix, int len, unsigned char* gues
 }
 
 void A_RHR(unsigned char* a, uint64_t q, int radix, int len, unsigned char* guess) {
-	
-
-
+	Xp = malloc(len);
+	memcpy(Xp, a, len);
+	unsigned char Rp[len];
+	int m = (int)ceil((double)len/2);
+	int n = len - m;
+	memcpy(Rp, a+m, n);
+	int M = (int) pow(radix, m);	
+	int N = (int) pow(radix, n);
+	int l = 0;
+	double p = (double)1/(N - 1);
+	printf("p: %f\n", p);
+	double delta = (1-p) / pow(M, (R_FF3-2)/2);
+	printf("delta: %f\n", delta);
+	uint64_t V[N];
+	memset(V, 0, N*sizeof(uint64_t));
+	unsigned char T[8];
+	memset(T, 0, 8);
+	uint64_t i;
+	for (i=0x0LL; i<q; i++) {
+		unsigned char C[len];
+		Enc(C, T, 1, radix, len); // Encrypt X
+		unsigned char Cp[len];
+		Enc(Cp, T, 0, radix, len); // Encrypt X'
+		if (!memcpy(C, Cp, m)) {
+			int64_t diff = subtract_str(C+m, Cp+m, radix, n);
+			
+			
+			l++;
+		
+		}
+	}
 
 }
 
-int G_mr(uint64_t q, int radix, int len) {
-	X = malloc(len);
-	memcpy(X, "53", len); 
-	unsigned char a[len];
-	memcpy(a, "93", len);  // X' with same right half as X
-	unsigned char A_guess[len];
-	A_LHR(a, q, radix, len, A_guess); 
-	print_bytes(A_guess, len, "A's guess");
-	printf("\n");
-	int wrong = memcmp(A_guess, X, len);
-	free(X);
-	return !wrong;
-}
-
-int check_G_mr(uint64_t q, int radix, int len, unsigned char* M, unsigned char* a) {
+int G_mr(uint64_t q, int radix, int len, unsigned char* M, unsigned char* a, char type) {
 	X = malloc(len);
 	memcpy(X, M, len); 
 	unsigned char A_guess[len];
-	A_LHR(a, q, radix, len, A_guess); 
+	switch(type) {
+		case 'l':
+			A_LHR(a, q, radix, len, A_guess);
+			break;
+		case 'r':
+			A_RHR(a, q, radix, len, A_guess); 
+			break;
+		default:
+			printf("Invalid attack type.\n");
+			exit(0);
+	}
 	print_bytes(A_guess, len, "A's guess");
 	printf("\n");
 	int wrong = memcmp(A_guess, X, len);

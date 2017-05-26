@@ -2,6 +2,7 @@
 #define ENC_H
 
 #define FF3_T_LEN 8
+#define R_FF3 8
 
 
 #include <openssl/conf.h>

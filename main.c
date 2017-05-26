@@ -103,7 +103,7 @@ void attack_check(int radix, int len, unsigned char* a) {
 		if (memcmp(a, X, m)) {
 			print_num(X, len, "X");
 			uint64_t q = 0x1LL << 20;
-			int won = check_G_mr(q, radix, len, X, a);
+			int won = G_mr(q, radix, len, X, a, 'l');
 			fprintf(stderr, "win?: %d\n", won);
 			printf("\n");
 		}
@@ -119,13 +119,14 @@ int main(int argc, const char * argv[]) {
 
 	int len = 2;
 	int radix = 10;
-	unsigned char a[] = "92";
+	unsigned char a[2];
+	memcpy(a, "92", 2);
 	attack_check(radix, len, a);
 
-	
-// 	uint64_t q = 0x1LL << 20;
-// 	int won = G_mr(q, radix, len);
-// 	fprintf(stderr, "win?: %d\n", won);
+//unsigned char* a, uint64_t q, int radix, int len, unsigned char* guess
+// 	unsigned char a[] = "24";
+// 	unsigned char guess[2];
+// 	A_RHR(a, 10, 10, 2, guess);
 	
 	
 
